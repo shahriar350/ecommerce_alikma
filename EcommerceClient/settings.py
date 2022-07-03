@@ -187,3 +187,5 @@ SSL_HOST_IPN = HOSTNAME + "/user/payment/ipn/"
 WEBSITE_NAME = "bongobitan"
 OTP_USERNAME = "chocolateandbabyfoods@gmail.com"
 OTP_PASSWORD = "@cbfood$"
+import django_heroku
+django_heroku.settings(locals())
