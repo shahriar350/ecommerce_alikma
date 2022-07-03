@@ -1,0 +1,42 @@
+{% extends 'master.html' %}
+{% load crispy_forms_tags %}
+{% block head %}
+    {% if request.resolver_match.kwargs.pk %}
+        <title>Edit {{ object.name | capfirst }}</title>
+    {% else %}
+        <title>Create variation</title>
+    {% endif %}
+{% endblock %}
+
+{% block body %}
+    <h4 class="text-center my-2">Variation</h4>
+    <div class="my-3 d-flex justify-content-between">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'main:dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'main:variation.index' %}">Variation</a></li>
+                {% if request.resolver_match.kwargs.pk %}
+                    <li class="breadcrumb-item active" aria-current="page">Create</li>
+                {% else %}
+                    <li class="breadcrumb-item active" aria-current="page">Edit {{ object.name }}</li>
+                {% endif %}
+
+            </ol>
+        </nav>
+        <a href="{% url 'main:variation.index' %}" class="btn btn-success">All Variation</a>
+    </div>
+    <div>
+        <form method="post">
+            {% csrf_token %}
+            {{ form |crispy }}
+
+            {% if  request.resolver_match.kwargs.pk %}
+                <button class="btn btn-success" type="submit">Update</button>
+                <a class="btn btn-danger" href="{% url 'main:variation.delete' request.resolver_match.kwargs.pk %}">Delete</a>
+            {% else %}
+                <button class="btn btn-success" type="submit">Create</button>
+            {% endif %}
+        </form>
+    </div>
+{% endblock %}
+

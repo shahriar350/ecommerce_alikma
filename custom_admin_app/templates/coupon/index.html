@@ -1,0 +1,73 @@
+{% extends 'master.html' %}
+{% load mptt_tags %}
+{% block head %}
+    <title>Coupon</title>
+
+{% endblock %}
+
+{% block body %}
+    <h4 class="text-center my-2">Coupon</h4>
+    <div class="my-3 d-flex justify-content-between">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'main:dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Coupon</li>
+            </ol>
+        </nav>
+        <a href="{% url 'main:coupon.create' %}" class="btn btn-success">Create new Coupon</a>
+    </div>
+
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Name</th>
+            <th scope="col">Reduce money</th>
+            <th scope="col">Trash</th>
+            <th scope="col">Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for object in object_list %}
+            <tr>
+                <th scope="row">{{ forloop.counter }}</th>
+                <td>{{ object.name | capfirst }}</td>
+                <td>{{ object.reduce_money | capfirst }}</td>
+                <td>
+                    {% if object.trash %}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                             class="bi bi-check2" viewBox="0 0 16 16">
+                            <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/>
+                        </svg>
+                    {% else %}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                             class="bi bi-x-lg" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd"
+                                  d="M13.854 2.146a.5.5 0 0 1 0 .708l-11 11a.5.5 0 0 1-.708-.708l11-11a.5.5 0 0 1 .708 0Z"/>
+                            <path fill-rule="evenodd"
+                                  d="M2.146 2.146a.5.5 0 0 0 0 .708l11 11a.5.5 0 0 0 .708-.708l-11-11a.5.5 0 0 0-.708 0Z"/>
+                        </svg>
+                    {% endif %}
+{#                    {{ object.trash }}#}
+                </td>
+                <td class="d-flex">
+                    <div class="px-2">
+                        <a href="{% url 'main:coupon.update' object.id %}">Edit</a>
+                    </div>
+                    |
+                    <div class="px-2">
+                        <a href="{% url 'main:coupon.delete' object.id %}">Delete</a>
+                    </div>
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="5" class="text-center">No data is available.</td>
+            </tr>
+        {% endfor %}
+
+
+        </tbody>
+    </table>
+{% endblock %}

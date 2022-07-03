@@ -1,0 +1,139 @@
+{% extends 'master.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+{#{% include 'django_quill/media.html' %}#}
+{#{% block head %}#}
+{#    <title>Create product</title>#}
+{#    <script src="{% static 'js/axios.min.js' %}"></script>#}
+{#    <script src="https://unpkg.com/vue-multiselect@2.1.0"></script>#}
+{#    <link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css">#}
+{#    <script type="module">#}
+{#        import {createApp} from 'https://unpkg.com/petite-vue?module'#}
+{##}
+{#        createApp({#}
+{#            $delimiters: ['[[', ']]'],#}
+{#            // exposed to all expressions,#}
+{#            // mounted#}
+{#            mounted() {#}
+{#                axios.get("/basic/category/")#}
+{#                    .then(res => {#}
+{#                        this.categories = res.data#}
+{#                    })#}
+{#                axios.get("/basic/brand/")#}
+{#                    .then(res => {#}
+{#                        this.brands = res.data#}
+{#                    })#}
+{#                axios.get("/basic/product/type/")#}
+{#                    .then(res => {#}
+{#                        this.types = res.data#}
+{#                    })#}
+{#                axios.get("/basic/collection/")#}
+{#                    .then(res => {#}
+{#                        this.collections = res.data#}
+{#                    })#}
+{##}
+{#            },#}
+{#            brands: [],#}
+{#            types: [],#}
+{#            categories: [],#}
+{#            collections: [],#}
+{#            product: {#}
+{#                name: '',#}
+{#                brand: '',#}
+{#                type: '',#}
+{#                categories: '',#}
+{#                collections: '',#}
+{##}
+{#            }#}
+{#        }).mount()#}
+{#    </script>#}
+{#{% endblock %}#}
+{##}
+{#{% block body %}#}
+{#    <h4 class="text-center my-2">Create Product</h4>#}
+{#    <div class="my-3 d-flex justify-content-between">#}
+{#        <nav aria-label="breadcrumb">#}
+{#            <ol class="breadcrumb">#}
+{#                <li class="breadcrumb-item"><a href="{% url 'main:dashboard' %}">Home</a></li>#}
+{#                <li class="breadcrumb-item"><a href="{% url 'main:product.index' %}">Product</a></li>#}
+{#                <li class="breadcrumb-item active" aria-current="page">Create product</li>#}
+{##}
+{#            </ol>#}
+{#        </nav>#}
+{#        <a href="{% url 'main:product.index' %}" class="btn btn-success">All products</a>#}
+{#    </div>#}
+{#    <div v-scope @vue:mounted="mounted">#}
+{#        <form action="">#}
+{#            <div class="form-group mb-2">#}
+{#                <label for="name" class="form-label">Product Name</label>#}
+{#                <input id="name" type="text" v-model="product.name" class="form-control">#}
+{#            </div>#}
+{#            <div class="form-group mb-2">#}
+{#                <label for="brand" class="form-label">Brand</label>#}
+{#                <select class="form-select" name="brand" id="brand">#}
+{#                    <option v-for="(brand,index) in brands" :value="brand.id">[[brand.name]]</option>#}
+{#                </select>#}
+{#            </div>#}
+{#            <div class="form-group mb-2">#}
+{#                <label for="type" class="form-label">Type</label>#}
+{#                <multiselect v-model="form.type" :options="types"></multiselect>#}
+{#                <select class="form-select" name="type" id="type" v-model="form.type">#}
+{#                    <option v-for="(type,index) in types" :value="type.id">[[type.name]]</option>#}
+{#                </select>#}
+{#            </div>#}
+{#            <div class="form-group mb-2">#}
+{#                [[form.categories]]#}
+{#                <label for="categories" class="form-label">Categories</label>#}
+{##}
+{#                <select multiple class="form-select" name="categories" id="type" v-model="form.categories">#}
+{#                    <option v-for="(category,index) in categories" :value="category.id">[[category.name]]</option>#}
+{#                </select>#}
+{#            </div>#}
+{#            <div class="form-group mb-2">#}
+{#                [[form.categories]]#}
+{#                <label for="collections" class="form-label">Collections</label>#}
+{##}
+{#                <select multiple class="form-select" name="collections" id="collections" v-model="form.collections">#}
+{#                    <option v-for="(collection,index) in collections" :value="collection.id">[[collection.name]]</option>#}
+{#                </select>#}
+{#            </div>#}
+{##}
+{#        </form>#}
+{#        #}
+{##}
+{#    </div>#}
+{#{% endblock %}#}
+{##}
+{#{% block js %}#}
+{##}
+{#{% endblock %}#}
+
+{% block head %}
+    <title>Create Product images</title>
+    {% include 'django_quill/media.html' %}
+{% endblock %}
+
+{% block body %}
+    <h4 class="text-center my-2">Create Product Images</h4>
+    <div class="my-3 d-flex justify-content-between">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'main:dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'main:product.index' %}">Product</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Create product images</li>
+            </ol>
+        </nav>
+        <a href="{% url 'main:product.index' %}" class="btn btn-success">All products</a>
+    </div>
+    <div class="card">
+        <form enctype="multipart/form-data" action="{% url 'main:product.create.image' product.id %}" class="card-body"
+              method="post">
+            {% csrf_token %}
+            <label class="form-label" for="images">Upload your product images</label>
+            <input name="images" id="images" type="file" multiple class="form-control">
+            <button class="btn btn-success w-100 mt-3">Save and Finish...</button>
+        </form>
+    </div>
+
+{% endblock %}
+

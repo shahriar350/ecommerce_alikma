@@ -1,0 +1,129 @@
+{% extends 'master.html' %}
+{% load mptt_tags %}
+{% block head %}
+    <title>Category</title>
+    <style>
+        ul, #myUL {
+            list-style-type: none;
+        }
+
+        #myUL {
+            margin: 0;
+            padding: 0;
+        }
+
+        .caret {
+            cursor: pointer;
+            -webkit-user-select: none; /* Safari 3.1+ */
+            -moz-user-select: none; /* Firefox 2+ */
+            -ms-user-select: none; /* IE 10+ */
+            user-select: none;
+        }
+
+        .caret::before {
+            content: "\25B6";
+            color: black;
+            display: inline-block;
+            margin-right: 6px;
+        }
+
+        .caret-down::before {
+            -ms-transform: rotate(90deg); /* IE 9 */
+            -webkit-transform: rotate(90deg); /* Safari */
+        ' transform: rotate(90 deg);
+        }
+
+        .nested {
+            display: none;
+        }
+
+        .active {
+            display: block;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <h4 class="text-center my-2">Category</h4>
+    <div class="my-3 d-flex justify-content-between">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'main:dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Category</li>
+            </ol>
+        </nav>
+        <a href="{% url 'main:category.create' %}" class="btn btn-success">Create new Category</a>
+    </div>
+    <ul id="myUL">
+        <li class="card card-header">Categories</li>
+        {% recursetree categories %}
+            <li class="card card-body"><span {% if not node.is_leaf_node %}
+                class="caret" {% endif %}>
+                <a href="{% url 'main:category.update' node.id %}">{{ node.name | capfirst }}</a>
+            </span>
+                {% if not node.is_leaf_node %}
+                    <ul class="nested">
+                        {{ children }}
+                    </ul>
+                {% endif %}
+            </li>
+        {% endrecursetree %}
+    </ul>
+
+    {#    <table class="table">#}
+    {#        <thead>#}
+    {#        <tr>#}
+    {#            <th scope="col">#</th>#}
+    {#            <th scope="col">Name</th>#}
+    {#            <th scope="col">Slug</th>#}
+    {#            <th scope="col">Action</th>#}
+    {#        </tr>#}
+    {#        </thead>#}
+    {#        <tbody>#}
+    {##}
+    {#        {% recursetree categories %}#}
+    {#            <tr>#}
+    {#                <th scope="row"></th>#}
+    {#                <td>{{ node.name | capfirst }}</td>#}
+    {#                <td>{{ node.slug | capfirst }}</td>#}
+    {#                <td class="d-flex">#}
+    {#                    <div class="px-2">#}
+    {#                        <a href="{% url 'main:category.update' node.id %}">Edit</a>#}
+    {#                    </div>#}
+    {#                    |#}
+    {#                    <div class="px-2">#}
+    {#                        <a href="">Delete</a>#}
+    {#                    </div>#}
+    {#                </td>#}
+    {#                {% if not node.is_leaf_node %}#}
+    {#                    <tr class="bg-gray">#}
+    {#                        <td colspan="4">#}
+    {#                            {{ children }}#}
+    {#                    </table>#}
+    {#                    </td>#}
+    {#                    </tr>#}
+    {##}
+    {#                {% endif %}#}
+    {#            </tr>#}
+    {##}
+    {#        {% endrecursetree %}#}
+    {##}
+    {##}
+    {#    </tbody>#}
+    {#    </table>#}
+{% endblock %}
+{% block js %}
+    <script>
+        var toggler = document.getElementsByClassName("caret");
+        var i;
+
+        for (i = 0; i < toggler.length; i++) {
+            toggler[i].addEventListener("click", function () {
+                this.parentElement.querySelector(".nested").classList.toggle("active");
+                this.classList.toggle("caret-down");
+            });
+        }
+    </script>
+{% endblock %}
+
+

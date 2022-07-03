@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css" rel="stylesheet">
+    <style>
+
+        {% comment %}
+        @media print {
+          @page {
+            size: letter portrait;
+            background-image: url("something.jpg");
+            padding: 3in .5in .75in .5in;
+          }
+        }
+        {% endcomment %}
+
+        {% comment %}
+        @page {
+          size: 5.5in 8.5in !important;
+          margin: 70pt 60pt 70pt!important;
+        }
+        {% endcomment %}
+
+        {% comment %}
+        @page {
+            margin: 120px 50px 35px 50px;
+            background-image: url('{{ ''|summary_bg_image_path }}');
+        }
+        {% endcomment %}
+
+    </style>
+</head>
+{% load report_tags %}
+{% load static %}
+
+
+<body style="font-family: Arial, Helvetica, sans-serif;">
+{# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #}
+{# Cover Page #}
+{# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #}
+<div class="cover-page"
+     style="background-image: url('{{ ''|hacker_face_image_path }}');margin-top: -.2in;width: 105%;margin-left:-7px">
+    <div style="min-height: 14.6in;">
+
+        <div class="kensa-logo">
+            <img class="kensa-logo-img" src="{{ ''|kensa_logo_image_path }}" alt="logo">
+        </div>
+        <h1 class="kensa-left-padding text-light cover-page-heading"><strong>STATIC ANALYSIS IOS REPORT</strong>
+        </h1>
+        <p class="kensa-left-padding text-light cover-page-small-heading">Generated {% now "jS F Y H:i" %}</p>
+        {% if scan_info %}
+            <table class="kensa-left-padding scan-info">
+                <tr>
+                    <td>
+                        <img class="scan-info-icon" src="{{ ''|base_dir }}{{ scan_info.icon_url }}" alt="">
+                    </td>
+                    <td>
+                        <p class="text-left text-light scan-info-text"> {{ scan_info.file_name }}</p>
+                    </td>
+                </tr>
+            </table>
+        {% endif %}
+    </div>
+</div>
+<div style="background-image: url('{{ ''|summary_bg_image_path }}');background-size: cover;margin: 0 -8px">
+    <div class="new-page summary-cover" style="background-image: url('{{ ''|summary_bg_image_path }}');">
+        {# ============================================== #}
+        {# Report Summary #}
+        {# ============================================== #}
+        <div style="min-height: 17.0in;">
+            <div class="mt-5">
+
+                <h1 class="summary-heading summary-left-padding "><strong>REPORT SUMMARY</strong></h1>
+
+                <div class="graph"></div>
+
+                <div class="small-font summary-left-padding ">
+                    <h4 class="recommendations"><img src="{{ ''|recommendation_icon_path }}" width="30"> <span
+                            class="recommendations-text"> STATIC ANALYSIS IOS</span></h4>
+                </div>
+
+                <div class="summary-content"
+                     style="background-image: url('{{ ''|summary_pie_bg_image_path }}');padding: 165px 0;">
+                    <div class="summary-pie-content">
+                        <span class="summary-pie-title" style="color: white; font-size: 18px;"> Issues with respect to severity </span>
+                        <span class="summary-pie-title" style="font-size: 18px;">{{ scan_info.total_issues }} Findings from {% now "jS F Y H:i" %}</span>
+                    </div>
+                    <table style="width: 100%;">
+                        <tr style="width: 100%;">
+                            <td style="width: 45%; text-align: right;">
+                                {% if scores.cvss_avarage >= 8 %}
+                                    <div class="security-score-graph"
+                                         style="background: #F95E59; width: 180px; height: 180px; line-height: 40px; font-size: 18px;">
+                                        <div style="display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                                            <br>Security Score<br>
+                                            <b style="font-size:smallr;color: {{ scores.color }};">{{ scores.cvss_avarage }}
+                                                / 10</b>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                {% if scores.cvss_avarage >= 5 and scores.cvss_avarage < 8 %}
+                                    <div class="security-score-graph"
+                                         style="background: #FFBD22; width: 180px; height: 180px; line-height: 40px; font-size: 18px;">
+                                        <div style="display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                                            <br>Security Score<br>
+                                            <b style="font-size:smallr;color: #334D6E;">{{ scores.cvss_avarage }} /
+                                                10</b>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                {% if scores.cvss_avarage < 5 %}
+                                    <div class="security-score-graph"
+                                         style="background: #02D691; width: 180px; height: 180px; line-height: 40px; font-size: 18px;">
+                                        <div style="display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                                            <br>Security Score<br>
+                                            <b style="font-size:smallr;color: {{ scores.color }};">{{ scores.cvss_avarage }}
+                                                / 10</b>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td style="width: 45%; padding-left: 50px;">
+
+                                <div class="piechart-indicator-container">
+                                    <span class="piechart-indicator" style="background-color:#02D691;"></span>
+                                    <span class="piechart-indicator-label"><span
+                                            style="color: #02D691;">{{ scan_info.issues.issues_low }}</span>
+                                LOW</span>
+                                </div>
+
+                                <div class="piechart-indicator-container">
+                                    <span class="piechart-indicator" style="background-color: #FFBD22;"></span>
+                                    <span class="piechart-indicator-label"> <span
+                                            style="color: #FFBD22;">{{ scan_info.issues.issues_mid }}</span>
+                                MEDIUM </span>
+                                </div>
+
+                                <div class="piechart-indicator-container">
+                                    <span class="piechart-indicator" style="background-color:#F95E59;"></span>
+                                    <span class="piechart-indicator-label"><span
+                                            style="color: #F95E59;">{{ scan_info.issues.issues_high }}</span>
+                                HIGH</span>
+                                </div>
+
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    {# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #}
+    {# Executive Summary #}
+    {# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #}
+
+    <div class="new-page summary-cover" style="background-image: url('{{ ''|summary_bg_image_path }}');">
+        <div style="min-height: 0in;">
+            {% if scan_info %}
+                <div class="mt-5" style="width: 100%;">
+                    <h1 class="summary-heading summary-left-padding "><strong>GENERAL INFORMATION</strong></h1>
+                    <p class="summary-left-padding text-light general-small-heading">Date {{ scan_info.date }}</p>
+
+                    <table class="summary-left-padding general-table"
+                           style="background-image: url('{{ ''|general_hd_bg_image_path }}');margin-left:50px">
+                        <tr>
+                            <td style="width: 60%;">
+                                <p class="general-heading-content">{{ scan_info.file_name }}</p>
+                                <p class="general-heading-lab@page {
+              margin: 120px 50px 35px 50px;
+          }el">File Name</p>
+                            </td>
+                            <td>
+                                <p class="general-heading-content">{{ scan_info.system|capfirst }}</p>
+                                <p class="general-heading-label">Platform System</p>
+                            </td>
+                            <td>
+                                <p style="font-size: 30px"
+                                   class="general-heading-content">{{ scan_info.total_issues }}</p>
+                                <p class="general-heading-label">Total Issues</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center;" colspan="3">
+                                <span> Certificate Status </span>
+                                {% if scan_info.report_status == "Good" %}
+                                    <span class="text-primary ">{{ scan_info.report_status }}</span>
+                                {% elif scan_info.report_status == "Warning" %}
+                                    <span class="text-warning ">{{ scan_info.report_status }}</span>
+                                {% else %}
+                                    <span class="text-danger ">{{ scan_info.report_status }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            {% endif %} {# Closes app info #}
+
+
+            {# Certificate Analysis #}
+            {% if certificate_analysis %}
+                <div class="certificate_analysis">
+                    <div class="small-font">
+                        <h4 class="recommendations"><img src="{{ ''|recommendation_icon_path }}" width="30"> <span
+                                class="recommendations-text"> CERTIFICATE ANALYSIS</span></h4>
+                    </div>
+
+                    <table id="scan_info" class="certificate-analysis-table">
+                        {% for item in certificate_analysis %}
+                            <tr>
+                                <td class="certificate-head">Description</td>
+                                <td>{{ item.Description }}</td>
+                            </tr>
+                            <tr>
+                                <td class="certificate-head">Status</td>
+                                <td class="{% if item.Status == 'bad' %}text-danger{% elif item.Status == 'warning' %}text-warning{% else %}text-primary{% endif %}">
+                                    {{ item.Status|capfirst }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="certificate-head">v1 signature</td>
+                                <td>{{ item.v1_signature }}</td>
+                            </tr>
+                            <tr>
+                                <td class="certificate-head">v2 signature</td>
+                                <td>{{ item.v2_signature }}</td>
+                            </tr>
+                            <tr>
+                                <td class="certificate-head">v3 signature</td>
+                                <td>{{ item.v3_signature }}</td>
+                            </tr>
+                            <tr>
+                                <td class="certificate-head">Subject</td>
+                                <td>{{ item.Subject }}</td>
+                            </tr>
+                            <tr>
+                                <td class="certificate-head">Signature Algorithm</td>
+                                <td>{{ item.Signature_Algorithm }}</td>
+                            </tr>
+                            <tr>
+                                <td class="certificate-head">Serial Number</td>
+                                <td>{{ item.Serial_Number }}</td>
+                            </tr>
+                            <tr>
+                                <td class="certificate-head">Issuer</td>
+                                <td>{{ item.Issuer }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if playstore_info %}
+        <div class="cover"
+             style="background-image: url('{{ ''|summary_bg_image_path }}');">
+            <div style="min-height: 22.0in;">
+                {% if playstore_info %}
+                    <div style="margin-left: 50px; margin-right: 50px;">
+                        <h4 class="recommendations"><img src="{{ ''|recommendation_icon_path }}" width="30"> <span
+                                class="recommendations-text"> APPLICATION DESCRIPTION</span></h4>
+                        {% if playstore_info.description %}
+                            <p style="color:white; text-align: justify; color: 	#D3D3D3;">
+                                {{ playstore_info.description|clean_description }}
+                            </p>
+                        {% else %}
+                            <h5 style="color:white">
+                                There is no description for this application :(
+                            </h5>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+
+                {# playstore information #}
+                {% if playstore_info %}
+                    <div style="margin-left: 50px; margin-right: 50px;">
+                        <h4 class="recommendations"><img src="{{ ''|recommendation_icon_path }}" width="30"> <span
+                                class="recommendations-text"> Playstore Information</span></h4>
+                        <h5 class="text-muted">{{ recommendations }}</h5>
+                        <table id="scan_info" class="playstore-table">
+                            {{ report_tags }}
+                            {% for k, v in playstore_info.items %}
+                                {% if k != "description" %}
+                                    <tr>
+                                        <td class="certificate-head">{{ k|capfirst }}</td>
+                                        <td>{{ v }}</td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                        </table>
+                    </div>
+                {% endif %}
+            </div>
+            {# end playstore information #}
+        </div>
+    {% endif %}
+
+    <div class="">
+        <div class="findings-summary" style="margin: 50px 50px">
+            {% if code_analysis_plain or code_analysis_plain %}
+                <div class="new-page">
+                    <div class="">
+                        <br/>
+                        <h1 class="white summary-heading"><strong>FINDINGS SUMMARY</strong></h1>
+                        <table class="playstore-table" style="color: lightslategrey;">
+                            <thead>
+                            <tr style="border: none;">
+                                <th>IMPACT</th>
+                                <th>TITLE</th>
+                                <th>CATEGORY</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <!-- high -->
+                            {% for code in code_analysis_plain %}
+                                {% if code.severity == 'High' %}
+                                    {% if forloop.counter|divisibleby:"2" %}
+                                        <tr style="border: none;">
+                                            <td style=" border: none; width: 20%">
+                                        <span class='fas fa-exclamation-triangle'
+                                              style='color:#dd3036; display:inline-block;'></span>
+                                                <span style="color:#dd3036; display:inline-block;">{{ code.severity|upper }}</span>
+                                            </td>
+                                            <td>{{ code.issue }}</td>
+                                            <td>CODE</td>
+                                        </tr>
+                                    {% else %}
+                                        <tr style="border: none;">
+                                            <td style=" border: none; width: 20%">
+                                        <span class='fas fa-exclamation-triangle'
+                                              style='color:#dd3036; display:inline-block;'></span>
+                                                <span style="color:#dd3036; display:inline-block;">{{ code.severity|upper }}</span>
+                                            </td>
+                                            <td>{{ code.issue }}</td>
+                                            <td>CODE</td>
+                                        </tr>
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                            {% for permissions in code_analysis_plain %}
+                                {% if forloop.counter == 2 %}
+                                    {% for perm in permissions %}
+                                        {% if perm.severity == 'high' %}
+                                            {% if forloop.counter|divisibleby:"2" %}
+                                                <tr style="border: none;">
+                                                    <td style=" border: none; width: 20%">
+                                                <span class='fas fa-exclamation-triangle'
+                                                      style='color:#dd3036; display:inline-block;'></span>
+                                                        <span style="color:#dd3036; display:inline-block;">{{ perm.severity|upper }}</span>
+                                                    </td>
+                                                    <td>{{ perm.permission }}</td>
+                                                    <td>PERMISSION</td>
+                                                </tr>
+                                            {% else %}
+                                                <tr style="border: none; outline: none;">
+                                                    <td style=" border: none; width: 20%">
+                                                <span class='fas fa-exclamation-triangle'
+                                                      style='color:#dd3036; display:inline-block;'></span>
+                                                        <span style="color:#dd3036; display:inline-block;">{{ perm.severity|upper }}</span>
+                                                    </td>
+                                                    <td>{{ perm.permission }}</td>
+                                                    <td>PERMISSION</td>
+                                                </tr>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                            {% endfor %}
+
+                            <!-- Meedium -->
+                            {% for code in code_analysis_plain %}
+                                {% if code.severity == 'Medium' %}
+                                    {% if forloop.counter|divisibleby:"2" %}
+                                        <tr style="border: none;">
+                                            <td style=" border: none; width: 20%">
+                                        <span class='fas fa-exclamation-triangle'
+                                              style='color:#f18c3c; display:inline-block;'></span>
+                                                <span style="color:#f18c3c; display:inline-block;">{{ code.severity|upper }}</span>
+                                            </td>
+                                            <td>{{ code.issue }}</td>
+                                            <td>CODE</td>
+                                        </tr>
+                                    {% else %}
+                                        <tr style="border: none;">
+                                            <td style=" border: none; width: 20%">
+                                        <span class='fas fa-exclamation-triangle'
+                                              style='color:#f18c3c; display:inline-block;'></span>
+                                                <span style="color:#f18c3c; display:inline-block;">{{ code.severity|upper }}</span>
+                                            </td>
+                                            <td>{{ code.issue }}</td>
+                                            <td>CODE</td>
+                                        </tr>
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                            {% for permissions in permissions_overview %}
+                                {% if forloop.counter == 2 %}
+                                    {% for perm in permissions %}
+                                        {% if perm.severity == 'medium' %}
+                                            {% if forloop.counter|divisibleby:"2" %}
+                                                <tr style="border: none;">
+                                                    <td style=" border: none; width: 20%">
+                                                <span class='fas fa-exclamation-triangle'
+                                                      style='color:#f18c3c; display:inline-block;'></span>
+                                                        <span style="color:#f18c3c; display:inline-block;">{{ perm.severity|upper }}</span>
+                                                    </td>
+                                                    <td>{{ perm.permission }}</td>
+                                                    <td>PERMISSION</td>
+                                                </tr>
+                                            {% else %}
+                                                <tr style="border: none; outline: none;">
+                                                    <td style=" border: none; width: 20%">
+                                                <span class='fas fa-exclamation-triangle'
+                                                      style='color:#f18c3c; display:inline-block;'></span>
+                                                        <span style="color:#f18c3c; display:inline-block;">{{ perm.severity|upper }}</span>
+                                                    </td>
+                                                    <td>{{ perm.permission }}</td>
+                                                    <td>PERMISSION</td>
+                                                </tr>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                            {% endfor %}
+
+                            <!-- LOW -->
+                            {% for code in code_analysis_plain %}
+                                {% if code.severity == 'Low' %}
+                                    {% if forloop.counter|divisibleby:"2" %}
+                                        <tr style="border: none;">
+                                            <td style=" border: none; width: 20%">
+                                        <span class='fas fa-exclamation-triangle'
+                                              style='color:#65aee2; display:inline-block;'></span>
+                                                <span style="color:#65aee2; display:inline-block;">{{ code.severity|upper }}</span>
+                                            </td>
+                                            <td>{{ code.issue }}</td>
+                                            <td>CODE</td>
+                                        </tr>
+                                    {% else %}
+                                        <tr style="border: none;">
+                                            <td style=" border: none; width: 20%">
+                                        <span class='fas fa-exclamation-triangle'
+                                              style='color:#65aee2; display:inline-block;'></span>
+                                                <span style="color:#65aee2; display:inline-block;">{{ code.severity|upper }}</span>
+                                            </td>
+                                            <td>{{ code.issue }}</td>
+                                            <td>CODE</td>
+                                        </tr>
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                            {% for permissions in permissions_overview %}
+                                {% if forloop.counter == 2 %}
+                                    {% for perm in permissions %}
+                                        {% if perm.severity == 'low' %}
+                                            {% if forloop.counter|divisibleby:"2" %}
+                                                <tr style="border: none;">
+                                                    <td style=" border: none; width: 20%">
+                                                <span class='fas fa-exclamation-triangle'
+                                                      style='color:#65aee2; display:inline-block;'></span>
+                                                        <span style="color:#65aee2; display:inline-block;">{{ perm.severity|upper }}</span>
+                                                    </td>
+                                                    <td>{{ perm.permission }}</td>
+                                                    <td>PERMISSION</td>
+                                                </tr>
+                                            {% else %}
+                                                <tr style="border: none; outline: none;">
+                                                    <td style=" border: none; width: 20%">
+                                                <span class='fas fa-exclamation-triangle'
+                                                      style='color:#65aee2; display:inline-block;'></span>
+                                                        <span style="color:#65aee2; display:inline-block;">{{ perm.severity|upper }}</span>
+                                                    </td>
+                                                    <td>{{ perm.permission }}</td>
+                                                    <td>PERMISSION</td>
+                                                </tr>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                            {% endfor %}
+
+                            <!-- INFO -->
+                            {% for code in code_analysis_plain %}
+                                {% if code.severity == 'Info' %}
+                                    {% if forloop.counter|divisibleby:"2" %}
+                                        <tr style="border: none;">
+                                            <td style=" border: none; width: 20%">
+                                        <span class='fas fa-exclamation-triangle'
+                                              style='color:#65aee2; display:inline-block;'></span>
+                                                <span style="color:#65aee2; display:inline-block;">{{ code.severity|upper }}</span>
+                                            </td>
+                                            <td>{{ code.issue }}</td>
+                                            <td>CODE</td>
+                                        </tr>
+                                    {% else %}
+                                        <tr style="border: none;">
+                                            <td style=" border: none; width: 20%">
+                                        <span class='fas fa-exclamation-triangle'
+                                              style='color:#65aee2; display:inline-block;'></span>
+                                                <span style="color:#65aee2; display:inline-block;">{{ code.severity|upper }}</span>
+                                            </td>
+                                            <td>{{ code.issue }}</td>
+                                            <td>CODE</td>
+                                        </tr>
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                            {% for permissions in permissions_overview %}
+                                {% if forloop.counter == 2 %}
+                                    {% for perm in permissions %}
+                                        {% if perm.severity == 'info' %}
+                                            {% if forloop.counter|divisibleby:"2" %}
+                                                <tr style="border: none;">
+                                                    <td style=" border: none; width: 20%">
+                                                <span class='fas fa-exclamation-triangle'
+                                                      style='color:#65aee2; display:inline-block;'></span>
+                                                        <span style="color:#65aee2; display:inline-block;">{{ perm.severity|upper }}</span>
+                                                    </td>
+                                                    <td>{{ perm.permission }}</td>
+                                                    <td>PERMISSION</td>
+                                                </tr>
+                                            {% else %}
+                                                <tr style="border: none; outline: none;">
+                                                    <td style=" border: none; width: 20%">
+                                                <span class='fas fa-exclamation-triangle'
+                                                      style='color:#65aee2; display:inline-block;'></span>
+                                                        <span style="color:#65aee2; display:inline-block;">{{ perm.severity|upper }}</span>
+                                                    </td>
+                                                    <td>{{ perm.permission }}</td>
+                                                    <td>PERMISSION</td>
+                                                </tr>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                            {% endfor %}
+
+                            </tbody>
+                        </table>
+                        <br><br>
+                    </div>
+                </div>
+            {% endif %}
+            {# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #}
+            {# Security Overview #}
+            {# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #}
+            {% if pci_ctrls_overview or pci_ctrl_chart or owasp_pie_chart %}
+                <div class="new-page">
+                    <br/>
+                    <h1 class="summary-heading white"><strong>OVERVIEW OF ISSUES </strong></h1>
+                    <div class="small-font">
+
+                    </div>
+
+                    <div class="d-flex flex-row align-items-center">
+                        {% if risk_by_severity %}
+                            <div style="width: 100%;" class="mr-2">
+                                <div class="small-font summary-left-padding ">
+                                    <h4 class="recommendations"><img src="{{ ''|recommendation_icon_path }}" width="30">
+                                        <span
+                                                class="recommendations-text"> SECURITY OVERVIEW</span></h4>
+                                </div>
+                                <div class="risk-by-severity">
+                                    <img src='data:image/png;base64,{{ risk_by_severity }}'/>
+                                </div>
+                            </div>
+
+                            {# pci Overview#}
+                            {% if pci_ctrl_chart %}
+                                <div style="width: 100%;" class="mr-2">
+                                    <h1 class="summary-heading"><strong> PCI 321
+                                        Compliance Overview </strong></h1>
+
+                                    <div class="risk-by-severity">
+                                        <img src='data:image/png;base64,{{ pci_ctrl_chart }}'/>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            </div>
+
+
+
+                            {# pci req Overview findings table #}
+                            <div class="new-page summary-cover"
+                                 style="background-image: url('{{ ''|summary_bg_image_path }}'); color:white; padding-bottom: 1in;">
+                                <h1 class="summary-heading"><strong> PCI 321
+                                    Compliance Overview </strong></h1>
+                                {% if pci_ctrls_overview %}
+                                    <table border="0" cellspacing="0" cellpadding="0"
+                                           class="playstore-table summary-left-padding"
+                                           style="color: lightslategrey; width:100%; padding-left: 50px; padding-right: 50px; background-color: transparent;">
+                                        <thead>
+                                        <tr style="border: none; background-color: #15202D; height: 0.8in;">
+                                            <th style="border: none;">Type</th>
+                                            <th style="border: none; color: #dd3036;min-width: 70px;">High</th>
+                                            <th style="border: none; color: #f18c3c;min-width: 70px;">Mid</th>
+                                            <th style="border: none; color: #65aee2;min-width: 70px;">Low</th>
+                                            <th style="border: none;min-width: 70px;">Total</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for k,v in pci_321.items %}
+                                            <tr style="border: none; height: 0.8in;">
+                                                <td style="border: none; text-align: center">{{ v }}</td>
+                                                {% with severity_vals=pci_ctrls_overview|get_value_from_dict:k %}
+                                                    <td style="border: none; color: #dd3036; text-align: center">{{ severity_vals.high }}</td>
+                                                    <td style="border: none; color: #f18c3c; text-align: center">{{ severity_vals.info }}</td>
+                                                    <td style="border: none; color: #65aee2; text-align: center">{{ severity_vals.good }}</td>
+                                                    {% with severity_total=pci_ctrls_overview.totals %}
+                                                        <td style="border-left: 1px solid black; text-align: center;">{{ severity_total|get_value_from_dict:k }}</td>
+                                                    {% endwith %}
+                                                {% endwith %}
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div>
+                                <h2 class="lead font-weight-bold" style="width: 100%; color: #6A5ACD;">No risk by
+                                    severity to
+                                    show</h2>
+                            </div>
+                        {% endif %}
+                </div>
+
+                <div class="small-font">
+                    <h4 class="recommendations"><img src="{{ ''|recommendation_icon_path }}" width="30"> <span
+                            class="recommendations-text">
+                OVERVIEW OF HIGHEST OWASP ISSUES FOUND</span></h4>
+                </div>
+
+                <div class="d-flex flex-row align-items-center">
+                    {% if owasp_pie_chart %}
+                        <div>
+                            <img src='data:image/png;base64,{{ owasp_pie_chart }}'/>
+                        </div>
+                        {% if code_analysis_report %}
+                            <div style="width: 100%;">
+
+                                <div class="small-font">
+                                    <h4 class="recommendations"><img src="{{ ''|recommendation_icon_path }}" width="30">
+                                        <span class="recommendations-text">  FREQUENCY OF HIGHEST OWASP OCURRENCES</span>
+                                    </h4>
+                                </div>
+
+                                <table style="width: 100%;">
+                                    <tr>
+                                        <th scope="col" class="text-center bg-dark" style="color: white">OWASP
+                                        </td>
+                                        <th scope="col" class="text-center" style="background: yellow; color: black;">
+                                            Severity
+                                        </td>
+                                        <th scope="col" class="text-center">Total Ocurrences
+                                        </td>
+                                    </tr>
+                                    {% for k, v in code_analysis_report.items %}
+                                        <tr class="text-center">
+                                            <td>
+                                                {% with k=k|split:":" %}
+                                                    {% for each in k %}
+                                                        {% if forloop.counter == 1 %}
+                                                            <span class="badge badge-dark">{{ each }}</span>
+                                                        {% else %}
+                                                            {{ each }}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                {% endwith %}
+                                            </td>
+                                            <td class="text-center"><span class="badge badge-danger">High</span></td>
+                                            <td class="text-center">{{ v.high }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </table>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+                <div style="padding-top: 100px;" class="mt-5 new-page">
+
+                    <h4 class="recommendations"><img src="{{ ''|recommendation_icon_path }}" width="30"> <span
+                            class="recommendations-text"> MALWARE OVERVIEW</span></h4>
+
+                    {% comment %} <div>
+                        <h4 class="desc-title">
+                        <img src="{{ ''|description_icon_path }}" width="30">
+                        MALWARE OVERVIEW
+                        </h4>
+                    </div> {% endcomment %}
+
+                    {% if domains_bar_chart %}
+                        <div>
+                            <img src='data:image/png;base64,{{ domains_bar_chart }}'/>
+                        </div>
+                    {% else %}
+                        <div>
+                            <p>No domains found, nothing to show</p>
+                        </div>
+                    {% endif %}
+                    <div style="height: 1px;width:100%;background-color: lightslategrey;margin-top: 35px;margin-bottom: 30px;">
+                    </div>
+
+                </div>
+                </div>
+            {% endif %}
+
+        {# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #}
+        {# Permissions Overview #}
+        {# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #}
+        {% if permissions_overview2 %}
+            <div class="new-page" style="padding-top: 1px;color:white;margin-left: 50px;">
+                <h1 class="summary-heading white"><strong>PERMISSIONS OVERVIEW </strong></h1>
+                {% if permissions_overview2 %}
+
+                    {% for perm in permissions_overview2.permissions %}
+
+                        {% with p=perm.permission s=perm.severity d=perm.description r=perm.recommendation i=perm.info %}
+
+                            <table style="color: white; width: 100%">
+                                {% if s == 'high' %}
+                                    <tr>
+                                        <td style="width: 85%">
+                                            {% comment %} <img src="{{ ''|warning_icon_path }}" width="38"> {% endcomment %}
+                                            <h2><code style="color: ##8896AB;">{{ i }}</code></h2>
+                                        </td>
+                                        <td>
+                                            <p><span style="color: #dd3036;"
+                                                     class="badge badge-dark">{{ s|title }}</span>
+                                            </p>
+                                        </td>
+                                    </tr>
+                                {% elif s == 'medium' %}
+                                    <tr>
+                                        <td style="width: 85%">
+                                            {% comment %} <img src="{{ ''|warning_icon_path }}" width="38"> {% endcomment %}
+                                            <h2><code style="color: ##8896AB;">{{ i }}</code></h2>
+                                        </td>
+                                        <td>
+                                            <p><span style="color: #f18c3c;"
+                                                     class="badge badge-dark">{{ s|title }}</span>
+                                            </p>
+                                        </td>
+                                    </tr>
+                                {% elif s == 'low' %}
+                                    <tr>
+                                        <td style="width: 85%">
+                                            {% comment %} <img src="{{ ''|warning_icon_path }}" width="38"> {% endcomment %}
+                                            <h2><code style="color: ##8896AB;">{{ i }}</code></h2>
+                                        </td>
+                                        <td>
+                                            <p><span style="color: #65aee2;"
+                                                     class="badge badge-dark">{{ s|title }}</span>
+                                            </p>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td style="width: 85%">
+                                            {% comment %} <img src="{{ ''|warning_icon_path }}" width="38"> {% endcomment %}
+                                            <h2><code style="color: ##8896AB;">{{ i }}</code></h2>
+                                        </td>
+                                        <td>
+                                            <p><span style="color: #65aee2;"
+                                                     class="badge badge-dark">{{ s|title }}</span>
+                                            </p>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </table>
+
+
+                            <table>
+                                <tr>
+                                    <td style="height: 100px; color: white">
+                                        <h4 class="recommendations mt-5" style="display: block; margin-bottom: 0;">
+                                            <img style=" vertical-align: 13px;" src="{{ ''|description_icon_path }}"
+                                                 width="15" height="15">
+                                        </h4>
+                                    </td>
+                                    <td style="padding-left: 10px;">
+                                        <p>Description</p>
+                                        <p>{{ d }}</p>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="height: 100px; color: white">
+                                        <h4 class="recommendations mt-5" style="display: block; margin-bottom: 0;">
+                                            <img style=" vertical-align: 13px;"
+                                                 src="{{ ''|recommendation_icon_path }}"
+                                                 width="15" height="15">
+                                        </h4>
+                                    </td>
+                                    <td style="padding-left: 10px;">
+                                        <p>Recommendations</p>
+                                        <p>{{ r }}</p>
+                                    </td>
+                                </tr>
+                            </table>
+
+                        {% endwith %}
+                    {% endfor %}
+
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #}
+        {# Manifest #}
+        {# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #}
+        {% if grouped_manifest %}
+            <div class="new-page " style="padding-top: 1px;">
+                <div class="d-flex flex-row justify-content-between">
+                    <h1 class="summary-heading"><strong>MANIFEST OVERVIEW </strong></h1>
+
+                    <div class="d-flex flex-row justify-content-between align-items-center">
+                        <div class="mt-5" style="width: 100%;">
+                            <h4 class="recommendations"><img src="{{ ''|recommendation_icon_path }}" width="30">
+                                <span
+                                        class="recommendations-text">FINDINGS SUMMARY</span></h4>
+
+
+                            <table class="manifest-table" style="width: 100%;color: lightslategrey;">
+                                <thead>
+                                <tr style="border: none;">
+                                    <th>IMPACT</th>
+                                    <th>TITLE</th>
+                                    <th>CATEGORY</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <!-- HIgh -->
+                                {% if grouped_manifest %}
+                                    {% for manifest in grouped_manifest %}
+                                        {% if manifest.severity == 'high' %}
+                                            {% if forloop.counter == 1 %}
+                                                <tr style="border: none;">
+                                                    <td style=" border: none; width: 20%">
+                                                    <span class='fas fa-exclamation-triangle'
+                                                          style='color:#dd3036; display:inline-block;'></span>
+                                                        <span style="color:#dd3036; display:inline-block;">{{ manifest.severity|upper }}</span>
+                                                    </td>
+                                                    <td>{{ manifest.name }}</td>
+                                                    <td>MANIFEST</td>
+                                                </tr>
+                                            {% else %}
+                                                <tr style="border: none;">
+                                                    <td style=" border: none; width: 20%">
+                                                    <span class='fas fa-exclamation-triangle'
+                                                          style='color:#dd3036; display:inline-block;'></span>
+                                                        <span style="color:#dd3036; display:inline-block;">{{ manifest.severity|upper }}</span>
+                                                    </td>
+                                                    <td>{{ manifest.name }}</td>
+                                                    <td>MANIFEST</td>
+                                                </tr>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+
+                                <!-- MEDIUM -->
+                                {% if grouped_manifest %}
+                                    {% for manifest in grouped_manifest %}
+                                        {% if manifest.severity == 'medium' %}
+                                            {% if forloop.counter == 1 %}
+                                                <tr style="border: none;">
+                                                    <td style=" border: none; width: 20%">
+                                                    <span class='fas fa-exclamation-triangle'
+                                                          style='color:#f18c3c; display:inline-block;'></span>
+                                                        <span style="color:#f18c3c; display:inline-block;">{{ manifest.severity|upper }}</span>
+                                                    </td>
+                                                    <td>{{ manifest.name }}</td>
+                                                    <td>MANIFEST</td>
+                                                </tr>
+                                            {% else %}
+                                                <tr style="border: none;">
+                                                    <td style=" border: none; width: 20%">
+                                                    <span class='fas fa-exclamation-triangle'
+                                                          style='color:#f18c3c; display:inline-block;'></span>
+                                                        <span style="color:#f18c3c; display:inline-block;">{{ manifest.severity|upper }}</span>
+                                                    </td>
+                                                    <td>{{ manifest.name }}</td>
+                                                    <td>MANIFEST</td>
+                                                </tr>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+
+
+                                <!-- LOW -->
+                                {% if grouped_manifest %}
+                                    {% for manifest in grouped_manifest %}
+                                        {% if manifest.severity == 'low' %}
+                                            {% if forloop.counter == 1 %}
+                                                <tr style="border: none;">
+                                                    <td style=" border: none; width: 20%">
+                                                    <span class='fas fa-exclamation-triangle'
+                                                          style='color:#65aee2; display:inline-block;'></span>
+                                                        <span style="color:#65aee2; display:inline-block;">{{ manifest.severity|upper }}</span>
+                                                    </td>
+                                                    <td>{{ manifest.name }}</td>
+                                                    <td>MANIFEST</td>
+                                                </tr>
+                                            {% else %}
+                                                <tr style="border: none;">
+                                                    <td style=" border: none; width: 20%">
+                                                    <span class='fas fa-exclamation-triangle'
+                                                          style='color:#65aee2; display:inline-block;'></span>
+                                                        <span style="color:#65aee2; display:inline-block;">{{ manifest.severity|upper }}</span>
+                                                    </td>
+                                                    <td>{{ manifest.name }}</td>
+                                                    <td>MANIFEST</td>
+                                                </tr>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+
+
+                                <!-- INFO -->
+                                {% if grouped_manifest %}
+                                    {% for manifest in grouped_manifest %}
+                                        {% if manifest.severity == 'info' %}
+                                            {% if forloop.counter == 1 %}
+                                                <tr style="border: none;">
+                                                    <td style=" border: none; width: 20%">
+                                                    <span class='fas fa-exclamation-triangle'
+                                                          style='color:#65aee2; display:inline-block;'></span>
+                                                        <span style="color:#65aee2; display:inline-block;">{{ manifest.severity|upper }}</span>
+                                                    </td>
+                                                    <td>{{ manifest.name }}</td>
+                                                    <td>MANIFEST</td>
+                                                </tr>
+                                            {% else %}
+                                                <tr style="border: none;">
+                                                    <td style=" border: none; width: 20%">
+                                                    <span class='fas fa-exclamation-triangle'
+                                                          style='color:#65aee2; display:inline-block;'></span>
+                                                        <span style="color:#65aee2; display:inline-block;">{{ manifest.severity|upper }}</span>
+                                                    </td>
+                                                    <td>{{ manifest.name }}</td>
+                                                    <td>MANIFEST</td>
+                                                </tr>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+
+
+                                </tbody>
+                            </table>
+                            <br><br>
+
+                            {% if grouped_manifest %}
+                                <div class="new-page" style="padding-top: 1px;color:white;padding-left:50px;">
+                                <h1 class="summary-heading white"><strong>MANIFEST DETAILS </strong></h1>
+
+                                {% if grouped_manifest %}
+                                    {% for manifest in grouped_manifest %}
+                                        {% with n=manifest.name s=manifest.severity d=manifest.description r=manifest.recommendation i=manifest.issue %}
+
+                                            <table style="color: white; width: 100%">
+
+                                                {% if s == 'high' %}
+                                                    <tr>
+                                                        <td style="width: 85%">
+                                                            <p style="color: #8896AB;font-size: 17px;">{{ i|remove_html_tags|dot_with_space }}</p>
+                                                        </td>
+                                                        <td>
+                                                            <p><span style="color: #dd3036;"
+                                                                     class="badge badge-dark">{{ s|title }}</span>
+                                                            </p>
+                                                        </td>
+                                                    </tr>
+                                                {% elif s == 'medium' %}
+                                                    <tr>
+                                                        <td style="width: 85%">
+                                                            <p style="color: #8896AB;font-size: 17px;">{{ i|remove_html_tags|dot_with_space }}</p>
+                                                        </td>
+                                                        <td>
+                                                            <p><span style="color: #f18c3c;"
+                                                                     class="badge badge-dark">{{ s|title }}</span>
+                                                            </p>
+                                                        </td>
+                                                    </tr>
+                                                {% elif s == 'low' %}
+                                                    <tr>
+                                                        <td style="width: 85%">
+                                                            <p style="color: #8896AB;font-size: 17px;">{{ i|remove_html_tags|dot_with_space }}</p>
+                                                        </td>
+                                                        <td>
+                                                            <p><span style="color: #65aee2;"
+                                                                     class="badge badge-dark">{{ s|title }}</span>
+                                                            </p>
+                                                        </td>
+                                                    </tr>
+                                                {% else %}
+                                                    <tr>
+                                                        <td style="width: 85%">
+                                                            <p style="color: #8896AB;font-size: 17px;">{{ i|remove_html_tags|dot_with_space }}</p>
+                                                        </td>
+                                                        <td>
+                                                            <p><span style="color: #65aee2;"
+                                                                     class="badge badge-dark">{{ s|title }}</span>
+                                                            </p>
+                                                        </td>
+                                                    </tr>
+                                                {% endif %}
+                                            </table>
+
+
+                                            <table>
+                                                <tr>
+                                                    <td style="height: 100px; color: white">
+                                                        <h4 class="recommendations mt-5"
+                                                            style="display: block; margin-bottom: 0;">
+                                                            <img style=" vertical-align: 13px;"
+                                                                 src="{{ ''|description_icon_path }}" width="15"
+                                                                 height="15">
+                                                        </h4>
+                                                    </td>
+                                                    <td style="padding-left: 10px;">
+                                                        <p>Description</p>
+                                                        <p>{{ d }}</p>
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td style="height: 100px; color: white">
+                                                        <h4 class="recommendations mt-5"
+                                                            style="display: block; margin-bottom: 0;">
+                                                            <img style=" vertical-align: 13px;"
+                                                                 src="{{ ''|recommendation_icon_path }}" width="15"
+                                                                 height="15">
+                                                        </h4>
+                                                    </td>
+                                                    <td style="padding-left: 10px;">
+                                                        <p>Recommendations</p>
+                                                        <p>{{ r }}</p>
+                                                    </td>
+                                                </tr>
+                                            </table>
+
+                                            {% comment %} <div class="mb-4 border-bottom border-dark mt-5">
+                                                <div class="container">
+                                                    <div class="small-font" style="display: block; margin-bottom: 0;flex-direction: column;">
+                                                        <div style="display: block; margin-bottom: 0;">
+                                                        {% if s == 'high' %}
+                                                        <p class="manifest-name"
+                                                            style="color: #dd3036; display: block; margin-bottom: 0;">
+                                                            <img src="{{ ''|warning_icon_path }}" width="38">
+                                                            <span style="background-color: #dd3036;" class="badge badge-dark">{{ s|title }}</span>
+                                                            {{ i|remove_html_tags }}
+                                                        </p>
+                                                        {% elif s == 'medium' %}
+                                                        <p class="manifest-name"
+                                                            style="color: #f18c3c; display: block; margin-bottom: 0;">
+                                                            <img src="{{ ''|warning_icon_path }}" width="38">
+                                                            <span style="background-color: #f18c3c;" class="badge badge-dark">{{ s|title }}</span>
+                                                            {{ i|remove_html_tags }}
+                                                        </p>
+                                                        {% elif s == 'low' %}
+                                                        <p class="manifest-name"
+                                                            style="color: #65aee2; display: block; margin-bottom: 0;">
+                                                            <img src="{{ ''|warning_icon_path }}" width="38">
+                                                            <span style="background-color: #65aee2;" class="badge badge-dark">{{ s|title }}</span>
+                                                            {{ i|remove_html_tags }}
+                                                        </p>
+                                                        {% else %}
+                                                        <p class="manifest-name"
+                                                            style="color: #65aee2; display: block; margin-bottom: 0;">
+                                                            <img src="{{ ''|warning_icon_path }}" width="38">
+                                                            <span style="background-color: #65aee2;" class="badge badge-dark">{{ s|title }}</span>
+                                                            {{ i|remove_html_tags }}
+                                                        </p>
+                                                        {% endif %}
+                                                        <br>
+                                                        </div>
+                                                        <div class="ml-5">
+                                                        <div style="display: block; margin-bottom: 0;">
+                                                            <h4 class="desc-title" style="display: block; margin-bottom: 0;">
+                                                            <img src="{{ ''|description_icon_path }}" width="40">
+                                                            Description
+                                                            </h4>
+                                                            <h5 class="text-muted ml-5" style="display: block; margin-bottom: 0;">
+                                                            {{ d }}
+                                                            </h5>
+                                                        </div>
+                                                        <div class="small-font" style="display: block; margin-bottom: 0;">
+                                                            <h4 class="recommendations mt-5" style="display: block; margin-bottom: 0;">
+                                                            <img src="{{ ''|recommendation_icon_path }}" width="40">
+                                                            Recommendations
+                                                            </h4>
+                                                            <h5 class="text-muted ml-5" style="display: block; margin-bottom: 0;">{{ r }}</h5>
+                                                            <br>
+                                                        </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div> {% endcomment %}
+
+                                        {% endwith %}
+                                    {% endfor %}
+                                {% endif %}
+                            {% endif %}
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        {% endif %}
+    </div>
+</div>
+</div>
+</body>
+
+</html>

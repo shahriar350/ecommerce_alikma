@@ -1,0 +1,305 @@
+{% extends 'master.html' %}
+{% load static %}
+{% block head %}
+    <title>Create {{ product.name }} Variation</title>
+    <script src="{% static 'js/axios.min.js' %}"></script>
+    {#    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>#}
+    <script type="module">
+        import {createApp} from 'https://unpkg.com/petite-vue?module'
+
+        createApp({
+            // exposed to all expressions
+            $delimiters: ['[[', ']]'],
+            mounted() {
+                axios.get('/basic/variation/')
+                    .then(res => {
+                        this.all_variations = res.data
+                    })
+                this.custom_variations.push({
+                    product_id: {{ product.id }},
+                    sku: '',
+                    quantity: '',
+                    original_price: '',
+                    offer_price: '',
+                    offer_start: '',
+                    offer_end: '',
+                    next_stock_date: '',
+                    image: '',
+                    get_product_variation_values: [
+                        {
+                            variation: '',
+                            title: '',
+                        }
+                    ]
+                })
+            },
+            all_variations: [],
+
+            err_messages: [],
+            increase_variation() {
+                this.custom_variations.push({
+                    product_id: {{ product.id }},
+                    sku: '',
+                    quantity: '',
+                    original_price: '',
+                    offer_price: '',
+                    offer_start: '',
+                    offer_end: '',
+                    next_stock_date: '',
+                    image: '',
+                    get_product_variation_values: [
+                        {
+                            variation: '',
+                            title: '',
+                        }
+                    ]
+                })
+            },
+            decrease_variation(index) {
+                if (this.custom_variations.length > 1) {
+                    if (confirm("Do you want to remove this section?")) {
+                        //delete this.custom_variations[index]
+                        this.custom_variations.splice(parseInt(index), 1)
+                    }
+                }
+            },
+
+            increase_variation_value(variationIndex, valueIndex) {
+                this.custom_variations[variationIndex].get_product_variation_values.push({
+                    variation: '',
+                    title: '',
+                })
+            },
+            decrease_variation_value(variationIndex, valueIndex) {
+
+                if (this.custom_variations[variationIndex].get_product_variation_values.length > 1) {
+                    if (confirm("Do you want to remove?")) {
+                        this.custom_variations[variationIndex].get_product_variation_values.splice(valueIndex, 1)
+                    }
+                }
+            },
+            onChangeImage(e, index) {
+                this.custom_variations[index].image = e.target.files[0]
+            },
+            variation_demo: {
+                product_id: {{ product.id }},
+                sku: '',
+                quantity: '',
+                original_price: '',
+                offer_price: '',
+                offer_start: '',
+                offer_end: '',
+                next_stock_date: '',
+                image: '',
+                get_product_variation_values: [
+                    {
+                        variation: '',
+                        title: '',
+                    }
+                ]
+            },
+            custom_variations: [],
+            submitForm() {
+                let formdata = new FormData()
+                let arr = []
+                for (let i = 0; i < this.custom_variations.length; i++) {
+                    formdata.append("image", this.custom_variations[i].image)
+                    delete this.custom_variations[i]['image']
+                    this.custom_variations[i]['original_price'] = parseFloat(this.custom_variations[i]['original_price'])
+                    if (this.custom_variations[i]['offer_price'] === '') {
+                        this.custom_variations[i]['offer_price'] = parseFloat("0.00")
+                    } else {
+                        this.custom_variations[i]['offer_price'] = parseFloat(this.custom_variations[i]['offer_price'])
+                    }
+                    if (this.custom_variations[i]['offer_start'] === '') {
+                        this.custom_variations[i]['offer_start'] = null
+                    }
+                    if (this.custom_variations[i]['offer_end'] === '') {
+                        this.custom_variations[i]['offer_end'] = null
+                    }
+                    if (this.custom_variations[i]['next_stock_date'] === '') {
+                        this.custom_variations[i]['next_stock_date'] = null
+                    }
+                    if (this.custom_variations[i].image === '') {
+                        this.custom_variations[i].image = null
+                    }
+
+                    arr.push(JSON.parse(JSON.stringify(this.custom_variations[i])))
+                }
+                formdata.append("data", JSON.stringify(arr))
+                axios.post('/my/admin/product/save/variance/', formdata, {
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        mode: 'same-origin'
+                    }
+                }).then(res => {
+                    this.err_messages.splice(0, this.err_messages.length - 1)
+                    window.location.href = '/my/admin/product/create/images/{{ product.id }}/'
+                }).catch(err => {
+                    for (let i = 0; i < this.custom_variations.length; i++) {
+                        this.custom_variations[i].image = ""
+                    }
+                    this.err_messages.push(err.response.data)
+                })
+            },
+        }).mount()
+    </script>
+
+{% endblock %}
+
+{% block body %}
+    <h4 class="text-center my-2">Create Product</h4>
+    <div class="my-3 d-flex justify-content-between">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'main:dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'main:product.index' %}">Product</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Create product variation</li>
+            </ol>
+        </nav>
+        <a href="{% url 'main:product.index' %}" class="btn btn-success">All products</a>
+    </div>
+    <div class="d-flex justify-content-center">
+        <div class="card">
+            <div class="card-header">
+                Product Details
+            </div>
+            <div class="card-body">
+                <p>Name: {{ product.name | capfirst }}</p>
+                <p>Price: {{ product.original_price }}</p>
+            </div>
+        </div>
+    </div>
+    <div x-data="init" v-scope @vue:mounted="mounted">
+        <div class="my-3" v-if="err_messages.length > 0">
+            <p class="alert alert-danger" v-for="(message,index) in err_messages">[[message]]</p>
+        </div>
+        <div class="mt-3">
+            <form @submit.prevent="submitForm" class="row">
+                {% csrf_token %}
+                <div class="card card-header my-3">
+                    <h6>Add product details</h6>
+                </div>
+                <div class="col-lg-4 col-sm-6 col-12 "
+                     v-for="(variations,index) in custom_variations" :key="index">
+                    <div class="rounded border mb-3 p-3">
+                        <div class="d-flex justify-content-between">
+                            <p class="font-monospace fw-bold">[[index+1]].</p>
+                            <div class="d-flex">
+                                <div class="px-3 pointer" @click="increase_variation()">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                         class="bi bi-plus-circle" viewBox="0 0 16 16">
+                                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                                    </svg>
+                                </div>
+                                <div class="pointer" @click="decrease_variation(index)">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                         class="bi bi-dash-circle" viewBox="0 0 16 16">
+                                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                        <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label :for="`sku${index}`" class="form-label">Sku</label>
+
+                            <input v-model="custom_variations[index].sku" type="text" :id="`sku${index}`"
+                                   class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label :for="`quantity${index}`" class="form-label">Quantity</label>
+                            <input v-model.number="custom_variations[index].quantity" type="text"
+                                   :id="`quantity${index}`"
+                                   class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label :for="`original_price${index}`" class="form-label">Original price</label>
+                            <input v-model="custom_variations[index].original_price" type="text"
+                                   :id="`original_price${index}`"
+                                   class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label :for="`offer_price${index}`" class="form-label">Offer price</label>
+                            <input v-model="custom_variations[index].offer_price" type="number"
+                                   :id="`offer_price${index}`"
+                                   class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label :for="`offer_start${index}`" class="form-label">Offer start</label>
+                            <input v-model="custom_variations[index].offer_start" type="datetime-local"
+                                   :id="`offer_start${index}`"
+                                   class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label :for="`offer_end${index}`" class="form-label">Offer end</label>
+                            <input v-model="custom_variations[index].offer_end" type="datetime-local"
+                                   :id="`offer_end${index}`"
+                                   class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label :for="`next_stock_date${index}`" class="form-label">Next stock date</label>
+                            <input v-model="custom_variations[index].next_stock_date" type="date"
+                                   :id="`next_stock_date${index}`"
+                                   class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label :for="`file${index}`" class="form-label">Image</label>
+                            <input ref="imageref" @change="onChangeImage($event,index)" type="file" :id="`file${index}`"
+                                   class="form-control">
+                        </div>
+                        <h4 class="my-3 pb-2 border-bottom">Variation values</h4>
+
+                        <div class="mb-2"
+                             v-for="(values,valueIndex) in custom_variations[index].get_product_variation_values"
+                             :key="valueIndex">
+                            <div>
+                                <div class="d-flex justify-content-between">
+                                    <p class="font-monospace fw-bold">[[valueIndex+1]].</p>
+                                    <div class="d-flex">
+                                        <div class="px-3 pointer" @click="increase_variation_value(index,valueIndex)">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                 fill="currentColor"
+                                                 class="bi bi-plus-circle" viewBox="0 0 16 16">
+                                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                                            </svg>
+                                        </div>
+                                        <div class="pointer" @click="decrease_variation_value(index,valueIndex)">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                 fill="currentColor"
+                                                 class="bi bi-dash-circle" viewBox="0 0 16 16">
+                                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                                <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8z"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label :for="`variation${valueIndex}${index}`" class="form-label">Select a
+                                    Variation</label>
+
+                                <select class="form-control"
+                                        v-model="custom_variations[index].get_product_variation_values[valueIndex].variation"
+                                        :name="`variation${valueIndex}${index}`" :id="`variation${valueIndex}${index}`">
+                                    <option value="">---</option>
+                                    <option v-for="(variation,varaIndex) in all_variations" :key="varaIndex"
+                                            :value="variation.id">[[variation.name]]
+                                    </option>
+                                </select>
+                                <div class="form-group mb-2">
+                                    <label :for="`title${index}${valueIndex}`">Variation value*</label>
+                                    <input type="text" class="form-control" :id="`title${index}${valueIndex}`"
+                                           v-model="custom_variations[index].get_product_variation_values[valueIndex].title">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-success">Add Variations and continue ...</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}

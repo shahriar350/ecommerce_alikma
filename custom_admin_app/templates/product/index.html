@@ -1,0 +1,67 @@
+{% extends 'master.html' %}
+
+{% block head %}
+    <title>Products</title>
+{% endblock %}
+
+
+{% block body %}
+    <h4 class="text-center my-2">Product</h4>
+    <div class="my-3 d-flex justify-content-between">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'main:dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Products</li>
+            </ol>
+        </nav>
+        <a href="{% url 'main:product.create.basic' %}" class="btn btn-success">Create new Product</a>
+    </div>
+
+    <table class="table table-responsive mt-3">
+        <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Name</th>
+            <th scope="col">Brand</th>
+            <th scope="col">Type</th>
+            <th scope="col">Category</th>
+            <th scope="col">Collection</th>
+            <th scope="col">Price</th>
+            <th scope="col">Edit</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for object in object_list %}
+            <tr>
+                <th scope="row">{{ forloop.counter }}</th>
+                <td>{{ object.name }}</td>
+                <td>{{ object.brand.name }}</td>
+                <td>{{ object.type.name }}</td>
+                <td>
+{#                {{ object.categories }}#}
+                    {% for category in object.categories.all %}
+                    <span>{{ category }} |</span>
+                    {% endfor %}
+                </td>
+                <td>
+                    {% for collection in object.collections.all %}
+                    <span>{{ collection }} |</span>
+                    {% endfor %}
+                </td>
+                <td>{{ object.original_price }}</td>
+            <td>
+                <a href="">Edit</a>
+                <a href="">Delete</a>
+            </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="8" class="text-center">No data is available</td>
+            </tr>
+        {% endfor %}
+
+
+        </tbody>
+    </table>
+{% endblock %}
+
