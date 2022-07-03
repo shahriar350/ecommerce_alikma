@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_seed',
     'storages',
     'nested_admin',
     'rest_framework',
@@ -187,5 +186,3 @@ SSL_HOST_IPN = HOSTNAME + "/user/payment/ipn/"
 WEBSITE_NAME = "bongobitan"
 OTP_USERNAME = "chocolateandbabyfoods@gmail.com"
 OTP_PASSWORD = "@cbfood$"
-import django_heroku
-django_heroku.settings(locals())
