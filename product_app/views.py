@@ -103,25 +103,28 @@ class ProductFilterByType(ListAPIView):
 class UserSearchListView(ListAPIView):
 
     def get_queryset(self):
-        if not self.request.GET._mutable:
-            self.request.GET._mutable = True
-        if self.request.GET.get('categories') == '':
-            del self.request.GET['categories']
-        if self.request.GET.get('collections') == '':
-            del self.request.GET['collections']
 
-        return Product.objects.prefetch_related(
+        queryset = Product.objects.prefetch_related(
             Prefetch("get_product_images", queryset=ProductImage.objects.filter(primary=True).all())).filter(
-            active=True).all()
+            active=True)
+        if len(self.request.query_params.getlist('categories')) > 0:
+            new_list = list((map(lambda n: int(n),
+                                 filter(lambda n: n.isnumeric(), self.request.query_params.getlist('categories')))))
+            if len(new_list) > 0:
+                queryset = queryset.filter(categories__in=new_list)
+        if len(self.request.query_params.getlist('collections')) > 0:
+            new_list = list((map(lambda n: int(n),
+                                 filter(lambda n: n.isnumeric(), self.request.query_params.getlist('collections')))))
+            if len(new_list) > 0:
+                queryset = queryset.filter(collections__in=new_list)
+
+        return queryset
 
     serializer_class = ProductMinSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filter_class = ProductPriceRangeFilter
     search_fields = ['name']
-    # filterset_fields = ['brand',
-    #                     'type',
-    #                     'categories',
-    #                     'collections',"show_min_price__range"]
+
 
 
 class TopSellingProduct(ListAPIView):

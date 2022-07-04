@@ -73,7 +73,7 @@ class CartProductSerializer(serializers.Serializer):
                                                                             'variation': variation})
         # if product is already in db, update quantity and variation below
         if not created:
-            cart_product.quantity = quantity
+            cart_product.quantity = cart_product.quantity + quantity
             cart_product.variation = variation
             cart_product.save()
         return validated_data

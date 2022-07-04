@@ -211,24 +211,6 @@ class ProductCreateAll(CreateAPIView):
                 variations = ujson.loads(variation_get)
                 variance_images = request.data.getlist('variance_images', None)
                 for index, variation in enumerate(variations):
-                    # image_url = Optional[variance_images[index]]
-                    # if len(variance_images) > 0:
-                    # image_uploaded_variation = imagekit.upload_file(
-                    #     file=variance_images[index],  # required
-                    #     file_name='%s' % (uuid.uuid4()),  # required
-                    #     options={
-                    #         "folder": "/product/",
-                    #         "tags": ["product_image"],
-                    #         "is_private_file": False,
-                    #         "use_unique_file_name": True,
-                    #
-                    #     }
-                    # )
-                    # print("variation image upd")
-                    # print(image_uploaded_variation)
-                    #
-                    # image_url = image_uploaded_variation['response']['filePath']
-                    # print(image_url)
                     try:
                         img = variance_images[index]
                     except Exception as e:
@@ -254,16 +236,7 @@ class ProductCreateAll(CreateAPIView):
             images = request.data.getlist('images', None)
             if images is not None:
                 for i in images:
-                    # image_uploaded_additional = imagekit.upload_file(
-                    #     file=i,  # required
-                    #     file_name='%s' % (uuid.uuid4()),  # required
-                    #     options={
-                    #         "folder": "/product/",
-                    #         "tags": ["product_image"],
-                    #         "is_private_file": False,
-                    #         "use_unique_file_name": True,
-                    #     }
-                    # )
+                   
                     ProductImage.objects.create(image=i, product=prod)
             return Response(status=status.HTTP_201_CREATED)
 

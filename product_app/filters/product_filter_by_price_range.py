@@ -16,30 +16,12 @@ def Convert(string):
 
 class ProductPriceRangeFilter(django_filters.FilterSet):
     price = django_filters.RangeFilter(label="Price", method='filter_show_min_price')
-    categories = django_filters.ModelMultipleChoiceFilter(queryset=Category.objects.all(), method='filter_category')
-    collections = django_filters.ModelMultipleChoiceFilter(queryset=Collection.objects.all(),
-                                                           method='filter_collections')
-
-    def filter_category(self, queryset, name, value):
-        print(self.data)
-        if 'categories' in self.data and len(self.data.get('categories')) > 0:
-            return queryset.filter(categories__in=self.data.get('categories'))
-        else:
-            return queryset
-
-    def filter_collections(self, queryset, name, value):
-        print(self.data)
-        if 'collections' in self.data and len(self.data.get('collections')) > 0:
-            return queryset.filter(collections__in=self.data.get('collections'))
-        else:
-            return queryset
 
     class Meta:
         model = Product
         fields = ['brand',
                   'type',
-                  'categories',
-                  'collections', 'price']
+                  'price']
 
     def filter_show_min_price(self, queryset, name, value):
 
