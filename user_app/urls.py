@@ -5,6 +5,7 @@ urlpatterns = [
     path('add/product/to/cart/', views.CartProductView.as_view()),
     path('carts/', views.CartList.as_view()),
     path('cart/products/count/', views.CartProductCount.as_view()),
+    path('cart/remove/product/<int:product_id>/', views.CartProductRemove.as_view()),
     path('checkout/', views.CartCheckout.as_view()),
     path('payment/success/', views.PaymentSuccessSSL.as_view()),
     path('payment/fail/', views.payment_fail_ssl),

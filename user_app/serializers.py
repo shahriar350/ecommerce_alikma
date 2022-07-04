@@ -95,6 +95,10 @@ class CartUserSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class RemoveCartSerializer(serializers.Serializer):
+    product_id = serializers.PrimaryKeyRelatedField(queryset=Product.objects.filter(active=True).all())
+
+
 class CheckoutCreateSerializer(serializers.Serializer):
     cart = serializers.PrimaryKeyRelatedField(queryset=Cart.objects.filter(trash=False, completed=False).all())
     address = serializers.PrimaryKeyRelatedField(queryset=UserAddress.objects.all())

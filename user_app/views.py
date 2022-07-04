@@ -16,7 +16,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.decorators import api_view
-from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView, DestroyAPIView, get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
@@ -26,10 +26,10 @@ from auth_app.models import User
 from basic_module_app.models import Division, Coupon, DeliveryFreeArea, BasicSetting
 from basic_module_app.serializers import CouponSerializer
 from product_app.models import Product
-from user_app.models import Cart, CheckoutPayment, Checkout, CheckoutProduct
+from user_app.models import Cart, CheckoutPayment, Checkout, CheckoutProduct, CartProduct
 from user_app.serializers import CartProductSerializer, CheckoutCreateSerializer, CheckoutPaymentSerializer, \
     DivisionSerializer, CheckoutUserDetails, CartUserSerializer, UserInfoSerializer, OrderHistorySerializer, \
-    PasswordResetSerializer, TrackSerializer
+    PasswordResetSerializer, TrackSerializer, RemoveCartSerializer
 from django.core.files.storage import default_storage
 
 f = Fernet(settings.ENCRYPT_KEY)
@@ -49,6 +49,16 @@ class CartList(RetrieveAPIView):
     def get_object(self):
         return Cart.objects.prefetch_related("get_cart_products").filter(completed=False,
                                                                          user=self.request.user).first()
+
+
+class CartProductRemove(DestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+
+    def get_object(self):
+        cart_product = get_object_or_404(
+            CartProduct.objects.filter(cart__completed=False).all(), product_id=self.kwargs.get('product_id'))
+        return cart_product
 
 
 class CartProductCount(APIView):
