@@ -56,7 +56,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             message=_('Please provide a valid 11 digit phone number.'),
         ),
     ])
-    image = models.ImageField(null=True, blank=True)
+    image = models.ImageField(null=True, blank=True,upload_to='users')
     superuser = models.BooleanField(default=False)
     admin = models.BooleanField(default=False)
     active = models.BooleanField(default=True)

@@ -8,6 +8,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from basic_module_app.models import UserAddress, Coupon, District, Division, PostOffice
+from basic_module_app.serializers import UserAddressSerializer
 from product_app.models import Product, ProductVariation, ProductVariationValues
 from product_app.serializers import ProductSerializer, ProductMinSerializer
 from user_app.models import Cart, CartProduct, Checkout, CheckoutPayment, CheckoutProduct
@@ -47,6 +48,35 @@ class DivisionSerializer(serializers.ModelSerializer):
             'name',
             'get_districts',
         )
+
+
+class PostOfficeUSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PostOffice
+        fields = "__all__"
+
+
+class DistrictUSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = District
+        fields = "__all__"
+
+
+class DivisionUSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Division
+        fields = "__all__"
+
+
+class UserAddressUSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    post_office = PostOfficeUSerializer()
+    district = DistrictUSerializer()
+    division = DivisionUSerializer()
+
+    class Meta:
+        model = UserAddress
+        fields = "__all__"
 
 
 class CartProductSerializer(serializers.Serializer):
@@ -166,6 +196,7 @@ class UserInfoSerializer(serializers.Serializer):
     total_saving = serializers.DecimalField(default=0, max_digits=100, decimal_places=2, required=False,
                                             allow_null=True)
     total_cost = serializers.DecimalField(default=0, max_digits=100, decimal_places=2, required=False, allow_null=True)
+    user_locations = UserAddressUSerializer(many=True, required=False, allow_null=True)
 
 
 class OrderProductsSerializer(serializers.ModelSerializer):
@@ -208,3 +239,4 @@ class PasswordResetSerializer(serializers.Serializer):
 
 class TrackSerializer(serializers.Serializer):
     get_status_name = serializers.CharField(max_length=255)
+

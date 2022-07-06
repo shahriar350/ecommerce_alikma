@@ -16,7 +16,7 @@ from EcommerceClient.mixins import IsAdminOrReadOnly
 from basic_module_app.models import Category, Variation, Collection, Brand, ProductType, UserAddress, \
     Division, Banner
 from basic_module_app.serializers import CategorySerializer, VariationSerializer, CollectionSerializer, BrandSerializer, \
-    ProductTypeSerializer, UserAddressSerializer, BannerSerializer
+    ProductTypeSerializer, UserAddressSerializer, BannerSerializer, DivisionInnerSerializer
 
 from user_app.serializers import DivisionSerializer
 
@@ -72,6 +72,7 @@ class BannerList(ListAPIView):
     serializer_class = BannerSerializer
     queryset = Banner.objects.filter(trash=False).all()
 
+
 # class CouponBuyView(CreateAPIView):
 #     permission_classes = [IsAuthenticated]
 #     authentication_classes = [TokenAuthentication, SessionAuthentication]
@@ -124,3 +125,7 @@ class BannerList(ListAPIView):
 # class CouponPaymentCancelView(APIView):
 #     def post(self, request):
 #         return Response(data="Your coupon payment is canceled. Please try again.", status=status.HTTP_400_BAD_REQUEST)
+
+class InnerDivision(ListAPIView):
+    serializer_class = DivisionInnerSerializer
+    queryset = Division.objects.prefetch_related("get_districts__get_district_post_offices").all()

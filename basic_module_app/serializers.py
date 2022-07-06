@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from basic_module_app.models import Category, Variation, Collection, Brand, ProductType, UserAddress, \
-    Coupon, UserCoupon, Banner
+    Coupon, UserCoupon, Banner, Division, District, PostOffice
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -26,6 +26,7 @@ class BrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
         fields = "__all__"
+
 
 class BannerSerializer(serializers.ModelSerializer):
     class Meta:
@@ -52,6 +53,7 @@ class CouponSerializer(serializers.ModelSerializer):
         model = Coupon
         fields = "__all__"
 
+
 #
 # class UserCouponCreateSerializer(serializers.ModelSerializer):
 #     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
@@ -71,3 +73,24 @@ class CouponSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = CouponBank
 #         fields = "__all__"
+
+class PostOfferInnerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PostOffice
+        fields = "__all__"
+
+
+class DistrictInnerSerializer(serializers.ModelSerializer):
+    get_district_post_offices = PostOfferInnerSerializer(many=True)
+
+    class Meta:
+        model = District
+        fields = "__all__"
+
+
+class DivisionInnerSerializer(serializers.ModelSerializer):
+    get_districts = DistrictInnerSerializer(many=True)
+
+    class Meta:
+        model = Division
+        fields = "__all__"

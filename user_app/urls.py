@@ -1,6 +1,10 @@
 from django.urls import path
+from rest_framework.routers import DefaultRouter
+
 from . import views
 
+router = DefaultRouter()
+router.register("address", views.UserAddressView, basename='UserUAddress')
 urlpatterns = [
     path('add/product/to/cart/', views.CartProductView.as_view()),
     path('carts/', views.CartList.as_view()),
@@ -17,4 +21,6 @@ urlpatterns = [
     path('password/reset/', views.UserPasswordReset.as_view()),
     path("order/history/", views.OrderHistoryView.as_view(), name='user.order.history'),
     path("order/track/<slug:order_id>/", views.OrderTrackView.as_view(), name='user.order.track'),
+
 ]
+urlpatterns += router.urls

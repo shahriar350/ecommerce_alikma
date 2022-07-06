@@ -17,6 +17,7 @@ router.register("user/address", views.UserAddressView, basename='UserAddress')
 urlpatterns = [
     path('division/district/all/', views.DivisionAllView.as_view()),
     path('banner/', views.BannerList.as_view()),
+    path('get/division/district/postoffice/inner/', views.InnerDivision.as_view(), name='inner.division')
     # path('coupon/buy/', views.CouponBuyView.as_view()),
     # path('coupon/payment/complete/', views.CouponPaymentCompleteView.as_view()),
     # path('coupon/payment/failed/', views.CouponPaymentFailedView.as_view()),

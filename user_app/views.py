@@ -20,11 +20,13 @@ from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView,
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.viewsets import ModelViewSet
 from sslcommerz_lib import SSLCOMMERZ
 
+from EcommerceClient.mixins import IsAdminOrReadOnly
 from auth_app.models import User
-from basic_module_app.models import Division, Coupon, DeliveryFreeArea, BasicSetting
-from basic_module_app.serializers import CouponSerializer
+from basic_module_app.models import Division, Coupon, DeliveryFreeArea, BasicSetting, UserAddress
+from basic_module_app.serializers import CouponSerializer, UserAddressSerializer
 from product_app.models import Product
 from user_app.models import Cart, CheckoutPayment, Checkout, CheckoutProduct, CartProduct
 from user_app.serializers import CartProductSerializer, CheckoutCreateSerializer, CheckoutPaymentSerializer, \
@@ -194,7 +196,7 @@ class UserInfoView(RetrieveAPIView, CreateAPIView):
     serializer_class = UserInfoSerializer
 
     def get(self, request):
-        user = User.objects.prefetch_related('get_user_checkout__get_checkout_products').filter(
+        user = User.objects.prefetch_related('get_user_checkout__get_checkout_products', 'user_locations').filter(
             pk=request.user.id).annotate(total_buy=Sum('get_user_checkout__total_price'),
                                          total_save=Sum('get_user_checkout__save_money'),
                                          total_checkout=Sum(
@@ -208,6 +210,7 @@ class UserInfoView(RetrieveAPIView, CreateAPIView):
             'total_saving': user.total_save,
             'total_cost': user.total_buy,
             'total_checkout_products': user.total_checkout,
+            'user_locations': user.user_locations
         }, context={'request': request}).data)
 
     def post(self, request):
@@ -218,6 +221,7 @@ class UserInfoView(RetrieveAPIView, CreateAPIView):
             user.name = data.get('name')
         if 'image' in data and data['image'] is not None:
             user.image.delete()
+            print(data.get('image'))
             user.image = data.get('image')
         user.save()
         return Response(data=UserInfoSerializer({
@@ -248,3 +252,10 @@ class OrderTrackView(RetrieveAPIView):
 
     def get_object(self):
         return Checkout.objects.filter(id=self.kwargs.get('order_id')).first()
+
+
+class UserAddressView(ModelViewSet):
+    serializer_class = UserAddressSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = UserAddress.objects.all()
+

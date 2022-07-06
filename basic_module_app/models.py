@@ -71,8 +71,8 @@ class District(models.Model):
 
 
 class PostOffice(models.Model):
-    division = models.ForeignKey(Division, on_delete=models.CASCADE, related_name="get_post_offices")
-    district = models.ForeignKey(District, on_delete=models.CASCADE, related_name="get_post_offices")
+    division = models.ForeignKey(Division, on_delete=models.CASCADE, related_name="get_division_post_offices")
+    district = models.ForeignKey(District, on_delete=models.CASCADE, related_name="get_district_post_offices")
     name = models.CharField(max_length=255)
     code = models.PositiveIntegerField()
 
