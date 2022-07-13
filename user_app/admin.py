@@ -6,10 +6,12 @@ from user_app.models import Cart, CartProduct, CheckoutProduct, Checkout
 
 class CartProductAdmin(admin.TabularInline):
     model = CartProduct
+    extra = 0
 
 
 class CheckoutProductAdmin(admin.TabularInline):
     model = CheckoutProduct
+    extra = 0
 
 
 @admin.register(Cart)
