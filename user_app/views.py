@@ -257,5 +257,6 @@ class OrderTrackView(RetrieveAPIView):
 class UserAddressView(ModelViewSet):
     serializer_class = UserAddressSerializer
     permission_classes = [IsAuthenticated]
-    queryset = UserAddress.objects.all()
 
+    def get_queryset(self):
+        return UserAddress.objects.filter(user=self.request.user).all()
