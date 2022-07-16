@@ -112,17 +112,21 @@ class CartCheckout(CreateAPIView):
 
         setting = {'store_id': settings.SSL_STORE_ID, 'store_pass': settings.SSL_STORE_PASSWORD, 'issandbox': True}
         sslcommez = SSLCOMMERZ(setting)
+
         post_body = {'total_amount': total_price, 'currency': "BDT", 'tran_id': str(checkout.id),
                      'success_url': settings.SSL_HOST_SUCCESS,
                      'fail_url': settings.SSL_HOST_FAIL, 'cancel_url': settings.SSL_HOST_CANCEL, 'emi_option': 0,
-                     'cus_name': user.name,
+                     'cus_name': user.phone_number,
                      'cus_email': "None", 'cus_phone': user.phone_number, 'cus_add1': address.full_address,
                      'cus_city': address.district.name, 'cus_country': "Bangladesh", 'shipping_method': "NO",
                      'multi_card_name': "",
                      'num_of_item': 1, 'product_name': "None", 'product_category': "Test Category",
                      'product_profile': "general", }
         response = sslcommez.createSession(post_body)
-        return Response(data=response['GatewayPageURL'])
+        if response['status'] == "SUCCESS":
+            return Response(data=response['GatewayPageURL'])
+        else:
+            return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY, data=response)
         # return Response(status=status.HTTP_200_OK)
 
 
